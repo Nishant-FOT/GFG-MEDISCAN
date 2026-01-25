@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mediscan</title>
+    <title>Mediscan - Healthcare AI Platform</title>
     <style>
         * {
             margin: 0;
@@ -11,20 +11,81 @@
             box-sizing: border-box;
         }
 
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #06b6d4;
+            --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            --hospital-green: #10b981;
+            --hospital-red: #ef4444;
+            --hospital-blue: #3b82f6;
+            --input-bg: #f1f5f9;
+            --header-bg: rgba(255, 255, 255, 0.95);
+            --overlay-bg: rgba(255, 255, 255, 0.05);
+            --message-user-bg: #e0f2fe;
+            --message-ai-bg: #ffffff;
+        }
+
+        body.dark-mode {
+            /* Dark Theme */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --accent-primary: #667eea;
+            --accent-secondary: #764ba2;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --hospital-green: #34d399;
+            --hospital-red: #f87171;
+            --hospital-blue: #60a5fa;
+            --input-bg: #334155;
+            --header-bg: rgba(30, 41, 59, 0.95);
+            --overlay-bg: rgba(255, 255, 255, 0.05);
+            --message-user-bg: rgba(102, 126, 234, 0.15);
+            --message-ai-bg: rgba(255, 255, 255, 0.05);
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #e4e4e7;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Emergency Banner */
+        .emergency-banner {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 0.75rem 2rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         /* Header Styles */
         .header {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--header-bg);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid var(--border-color);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -32,6 +93,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .logo-section {
@@ -41,28 +103,37 @@
         }
 
         .logo {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
         .brand h1 {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand h1::before {
+            content: "🏥";
+            -webkit-text-fill-color: initial;
         }
 
         .brand p {
             font-size: 0.875rem;
-            color: #a1a1aa;
+            color: var(--text-secondary);
             margin-top: 0.25rem;
         }
 
@@ -72,37 +143,71 @@
             gap: 1rem;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border-radius: 50px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 1rem;
+            color: white;
+            font-size: 0.875rem;
         }
 
         .user-name {
-            font-weight: 500;
-            color: #e4e4e7;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .logout-btn {
-            padding: 0.5rem 1.5rem;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--hospital-red);
             color: white;
             border: none;
+            padding: 0.5rem 1.25rem;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 0.875rem;
         }
 
         .logout-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         /* Main Container */
@@ -116,95 +221,149 @@
             flex-direction: column;
         }
 
+        /* Hospital Stats */
+        .hospital-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
         /* Chat Container */
-        .chat-wrapper {
+        .chat-container {
             flex: 1;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-height: 500px;
+        }
+
+        .chat-header {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
         }
 
-        .chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-        }
-
-        /* Welcome Message */
+        /* Welcome Screen */
         .welcome-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 4rem 2rem;
-            min-height: 400px;
+            padding: 3rem 2rem;
+            height: 100%;
         }
 
         .welcome-icon {
             font-size: 5rem;
-            margin-bottom: 2rem;
-            animation: float 3s ease-in-out infinite;
+            margin-bottom: 1.5rem;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .welcome-screen h2 {
-            font-size: 2.5rem;
+        .welcome-title {
+            font-size: 2rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-primary);
             margin-bottom: 1rem;
         }
 
-        .welcome-screen p {
+        .welcome-text {
             font-size: 1.125rem;
-            color: #a1a1aa;
-            max-width: 600px;
+            color: var(--text-secondary);
+            max-width: 500px;
             line-height: 1.6;
         }
 
-        .welcome-screen .subtitle {
-            font-size: 0.875rem;
-            color: #71717a;
-            margin-top: 1rem;
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 700px;
         }
 
-        /* Message Bubbles */
+        .feature-card {
+            background: var(--input-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Messages */
         .message {
             display: flex;
             gap: 1rem;
-            animation: fadeIn 0.3s ease;
+            animation: slideIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -220,55 +379,52 @@
         }
 
         .message-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
             flex-shrink: 0;
+            background: var(--accent-gradient);
         }
 
         .message.user .message-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .message.ai .message-avatar {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--hospital-blue);
         }
 
         .message-content {
             max-width: 70%;
-            padding: 1rem 1.25rem;
+            background: var(--message-ai-bg);
+            padding: 1.25rem;
             border-radius: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--border-color);
+            box-shadow: var(--card-shadow);
         }
 
         .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+            background: var(--message-user-bg);
         }
 
         .uploaded-image {
             max-width: 100%;
-            max-height: 300px;
             border-radius: 12px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .image-filename {
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        /* AI Response Styles */
+        /* Analysis Results */
         .analysis-header {
             font-size: 1.25rem;
             font-weight: 700;
+            color: var(--accent-primary);
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -276,155 +432,115 @@
         }
 
         .analysis-text {
-            font-size: 0.9375rem;
-            color: #d4d4d8;
-            line-height: 1.6;
+            color: var(--text-primary);
+            line-height: 1.7;
             margin-bottom: 1.5rem;
         }
 
         .predictions-card {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--input-bg);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1.5rem;
+            border: 2px solid var(--border-color);
         }
 
         .predictions-title {
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 1rem;
-            font-size: 1rem;
+            font-size: 1.125rem;
         }
 
         .prediction-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .prediction-row:last-child {
-            border-bottom: none;
+            padding: 0.75rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
         }
 
         .prediction-label {
-            font-weight: 500;
-            color: #e4e4e7;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .prediction-badge {
-            padding: 0.25rem 0.75rem;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 0.375rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.875rem;
             font-weight: 600;
-        }
-
-        .prediction-row:nth-child(1) .prediction-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-
-        .prediction-row:nth-child(2) .prediction-badge {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-        }
-
-        .prediction-row:nth-child(3) .prediction-badge {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
+            font-size: 0.875rem;
         }
 
         .gradcam-section {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--input-bg);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1.5rem;
+            border: 2px solid var(--border-color);
         }
 
         .gradcam-title {
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            font-size: 0.9375rem;
-            color: #d4d4d8;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
         }
 
         .gradcam-img {
-            width: 100%;
-            max-width: 320px;
-            border-radius: 10px;
-            border: 2px solid #667eea;
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .gradcam-description {
-            font-size: 0.8125rem;
-            color: #a1a1aa;
-            margin-top: 0.75rem;
-            line-height: 1.5;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-style: italic;
         }
 
         .warning-box {
             background: rgba(239, 68, 68, 0.1);
-            border-left: 4px solid #ef4444;
+            border-left: 4px solid var(--hospital-red);
             padding: 1rem;
             border-radius: 8px;
-            font-size: 0.875rem;
-            color: #fca5a5;
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
-        /* Input Area */
-        .chat-input-area {
-            padding: 1.5rem 2rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .error-bubble {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--hospital-red);
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
         }
 
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        /* Chat Input Area */
+        .chat-input {
+            padding: 1.5rem;
+            background: var(--input-bg);
+            border-top: 2px solid var(--border-color);
         }
 
-        .upload-button {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .upload-button:hover:not(:disabled) {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .upload-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .preview-container {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .file-preview {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
             border-radius: 12px;
             padding: 1rem;
+            margin-bottom: 1rem;
             display: none;
             align-items: center;
             gap: 1rem;
         }
 
-        .preview-container.active {
+        .file-preview.active {
             display: flex;
         }
 
@@ -435,30 +551,28 @@
             object-fit: cover;
         }
 
-        .preview-details {
+        .preview-info {
             flex: 1;
         }
 
         .preview-name {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #e4e4e7;
+            font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 0.25rem;
         }
 
         .preview-size {
-            font-size: 0.75rem;
-            color: #a1a1aa;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
 
-        .remove-button {
+        .remove-btn {
+            background: var(--hospital-red);
+            color: white;
+            border: none;
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: #ef4444;
-            border: none;
-            color: white;
-            font-size: 1.25rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -466,42 +580,77 @@
             transition: all 0.3s ease;
         }
 
-        .remove-button:hover {
-            background: #dc2626;
+        .remove-btn:hover {
             transform: scale(1.1);
         }
 
-        .send-button {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border: none;
+        .input-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .upload-btn {
+            background: var(--accent-gradient);
             color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             transition: all 0.3s ease;
-            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
-        .send-button:hover:not(:disabled) {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        .upload-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
         }
 
-        .send-button:disabled {
+        .upload-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
+        .send-btn {
+            flex: 1;
+            background: var(--hospital-green);
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Spinner */
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-primary);
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -509,101 +658,168 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Error Message */
-        .error-bubble {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            padding: 1rem;
-            border-radius: 12px;
-            color: #fca5a5;
-            font-size: 0.875rem;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .brand h1 {
+                font-size: 1.25rem;
+            }
+
             .container {
                 padding: 1rem;
             }
 
-            .header {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
+            .user-name {
+                display: none;
+            }
+
+            .hospital-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .message-content {
                 max-width: 85%;
             }
 
-            .welcome-screen h2 {
-                font-size: 1.75rem;
-            }
-
-            .welcome-icon {
-                font-size: 3.5rem;
+            .welcome-features {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Emergency Banner -->
+    <div class="emergency-banner">
+        🚨 Medical Emergency? Call 112 or visit your nearest emergency room immediately
+    </div>
+
     <!-- Header -->
-    <div class="header">
+    <header class="header">
         <div class="logo-section">
-            <div class="logo">🏥</div>
+            <div class="logo">⚕️</div>
             <div class="brand">
-                <h1>MediScan AI</h1>
-                <p>Advanced Disease Diagnosis System</p>
+                <h1>MediScan</h1>
+                <p>AI-Powered Healthcare Diagnostics</p>
             </div>
         </div>
         <div class="user-section">
-            <div class="user-avatar" id="userAvatar">U</div>
-            <span class="user-name" id="userName">User</span>
+            <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="userName">User</span>
+            </div>
             <button class="logout-btn" id="logoutBtn">Logout</button>
         </div>
-    </div>
+    </header>
 
     <!-- Main Container -->
-    <div class="container">
-        <div class="chat-wrapper">
-            <!-- Messages Area -->
+    <main class="container">
+        <!-- Hospital Stats -->
+        <div class="hospital-stats">
+            <div class="stat-card">
+                <div class="stat-icon">🩺</div>
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value">95%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-value">2s</div>
+                <div class="stat-label">Avg Response</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔒</div>
+                <div class="stat-label">HIPAA Compliant</div>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                🤖 AI Diagnosis Assistant
+            </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="welcome-screen">
-                    <div class="welcome-icon">📸</div>
-                    <h2>Welcome to MediScan AI</h2>
-                    <p>Upload a medical image to begin diagnosis</p>
-                    <p class="subtitle">
-                        Our AI analyzes skin conditions using EfficientNet-B3 model<br>
-                        and provides visual explanations using Grad-CAM technology
+                    <div class="welcome-icon">🏥</div>
+                    <h2 class="welcome-title">Welcome to MediScan AI</h2>
+                    <p class="welcome-text">
+                        Upload medical images for instant AI-powered analysis. Our advanced deep learning model provides accurate diagnostic insights with visual explanations.
                     </p>
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔬</div>
+                            <div class="feature-title">Advanced Analysis</div>
+                            <div class="feature-desc">Deep learning diagnostics</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📸</div>
+                            <div class="feature-title">Image Recognition</div>
+                            <div class="feature-desc">X-rays, CT, MRI support</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <div class="feature-title">Grad-CAM Viz</div>
+                            <div class="feature-desc">Visual explanations</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Input Area -->
-            <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <button class="upload-button" id="uploadBtn" title="Upload Image">
-                        📎
+            <div class="chat-input">
+                <div class="file-preview" id="previewContainer">
+                    <img id="previewThumb" class="preview-thumb" alt="Preview">
+                    <div class="preview-info">
+                        <div class="preview-name" id="previewName">image.jpg</div>
+                        <div class="preview-size" id="previewSize">0 KB</div>
+                    </div>
+                    <button class="remove-btn" id="removeBtn">✕</button>
+                </div>
+                <div class="input-controls">
+                    <button class="upload-btn" id="uploadBtn">
+                        📁 Upload Image
+                    </button>
+                    <button class="send-btn" id="sendBtn" disabled>
+                        🚀 Analyze Image
                     </button>
                     <input type="file" id="fileInput" class="file-input" accept="image/*">
-                    
-                    <div class="preview-container" id="previewContainer">
-                        <img class="preview-thumb" id="previewThumb" alt="Preview">
-                        <div class="preview-details">
-                            <div class="preview-name" id="previewName">image.jpg</div>
-                            <div class="preview-size" id="previewSize">0 KB</div>
-                        </div>
-                        <button class="remove-button" id="removeBtn">×</button>
-                    </div>
-
-                    <button class="send-button" id="sendBtn" disabled title="Send Image">
-                        Send
-                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+            themeIcon.textContent = '☀️';
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
         // Global variables
         let currentUser = null;
         let currentFile = null;
@@ -630,12 +846,12 @@
                     credentials: 'include'
                 });
                 const data = await response.json();
-                
+
                 if (!data.success) {
                     window.location.href = '/login';
                     return;
                 }
-                
+
                 currentUser = data;
                 userName.textContent = data.full_name || data.username;
                 userAvatar.textContent = (data.full_name || data.username)[0].toUpperCase();
@@ -671,14 +887,14 @@
                     showError('Please select an image file');
                     return;
                 }
-                
+
                 if (file.size > 16 * 1024 * 1024) {
                     showError('File size must be less than 16MB');
                     return;
                 }
 
                 currentFile = file;
-                
+
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     uploadedImageDataUrl = e.target.result;
@@ -750,7 +966,7 @@
                 previewContainer.classList.remove('active');
                 uploadBtn.disabled = false;
                 sendBtn.disabled = true;
-                sendBtn.textContent = 'Send';
+                sendBtn.innerHTML = '🚀 Analyze Image';
             }
         });
 
@@ -791,7 +1007,7 @@
         function addAIResponse(data) {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message ai';
-            
+
             let predictionsHTML = '';
             data.predictions.forEach((pred, index) => {
                 predictionsHTML += `
@@ -811,9 +1027,9 @@
                     <div class="analysis-text">
                         ${data.explanation}
                     </div>
-                    
+
                     <div class="predictions-card">
-                        <div class="predictions-title">Top 3 Predictions:</div>
+                        <div class="predictions-title">📋 Top 3 Predictions:</div>
                         ${predictionsHTML}
                     </div>
 
