@@ -424,22 +424,23 @@
         </div>
     </div>
 
-    <script type="module" >// firebase-auth.js
+    <script type="module">
 // Create background particles
-        const bgAnimation = document.getElementById('bgAnimation');
-        const emojis = ['🏥', '⚕️', '🩺', '💊', '🩸', '🫀', '🩹', '🔬'];
-        for (let i = 0; i < 15; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-            particle.style.width = Math.random() * 60 + 20 + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 5 + 's';
-            particle.style.animationDuration = Math.random() * 10 + 10 + 's';
-            bgAnimation.appendChild(particle);
-        }
+const bgAnimation = document.getElementById('bgAnimation');
+const emojis = ['🏥', '⚕️', '🩺', '💊', '🩸', '🫀', '🩹', '🔬'];
+for (let i = 0; i < 15; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    particle.style.width = Math.random() * 60 + 20 + 'px';
+    particle.style.height = particle.style.width;
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 5 + 's';
+    particle.style.animationDuration = Math.random() * 10 + 10 + 's';
+    bgAnimation.appendChild(particle);
+}
+
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
@@ -448,7 +449,6 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
     GoogleAuthProvider,
-    signOut,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -467,260 +467,257 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Get DOM elements
-const emailInput = document.querySelector('input[type="email"]');
-const passwordInput = document.querySelector('input[type="password"]');
-const signInBtn = document.querySelector('.sign-in-btn');
-const googleSignInBtn = document.querySelector('.google-sign-in-btn');
-const createAccountLink = document.querySelector('.create-account-link');
+// Get DOM elements for Login Form
+const loginForm = document.getElementById('loginForm');
+const loginEmail = document.getElementById('loginEmail');
+const loginPassword = document.getElementById('loginPassword');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+const loginSuccess = document.getElementById('loginSuccess');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
 
-// Sign In with Email and Password
-async function signInWithEmail(email, password) {
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        showMessage('Sign in successful!', 'success');
-        console.log('Signed in user:', user);
-        
-        // Redirect to dashboard after successful login
-        setTimeout(() => {
-            window.location.href = 'index.html'; // Change to your dashboard page
-        }, 1000);
-        
-    } catch (error) {
-        handleAuthError(error);
-    }
-}
+// Get DOM elements for Signup Form
+const signupForm = document.getElementById('signupForm');
+const signupName = document.getElementById('signupName');
+const signupEmail = document.getElementById('signupEmail');
+const signupPassword = document.getElementById('signupPassword');
+const signupBtn = document.getElementById('signupBtn');
+const signupError = document.getElementById('signupError');
+const signupSuccess = document.getElementById('signupSuccess');
+const googleSignupBtn = document.getElementById('googleSignupBtn');
 
-// Sign Up with Email and Password
-async function signUpWithEmail(email, password) {
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        showMessage('Account created successfully!', 'success');
-        console.log('Created user:', user);
-        
-        // Redirect to dashboard
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
-        
-    } catch (error) {
-        handleAuthError(error);
-    }
-}
+// Toggle forms
+const showSignupLink = document.getElementById('showSignup');
+const showLoginLink = document.getElementById('showLogin');
 
-// Sign In with Google
-async function signInWithGoogle() {
-    try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        
-        showMessage('Google sign in successful!', 'success');
-        console.log('Google user:', user);
-        
-        // Redirect to dashboard
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
-        
-    } catch (error) {
-        handleAuthError(error);
-    }
-}
-
-// Sign Out
-async function signOutUser() {
-    try {
-        await signOut(auth);
-        showMessage('Signed out successfully', 'success');
-        window.location.href = 'login.html';
-    } catch (error) {
-        showMessage('Error signing out: ' + error.message, 'error');
-    }
-}
-
-// Handle Authentication Errors
-function handleAuthError(error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
+// Show/Hide Message
+function showMessage(element, message, type) {
+    element.textContent = message;
+    element.style.display = 'block';
     
-    console.error('Auth error:', errorCode, errorMessage);
-    
-    let userMessage = '';
-    
-    switch(errorCode) {
-        case 'auth/invalid-email':
-            userMessage = 'Invalid email address format.';
-            break;
-        case 'auth/user-disabled':
-            userMessage = 'This account has been disabled.';
-            break;
-        case 'auth/user-not-found':
-            userMessage = 'No account found with this email.';
-            break;
-        case 'auth/wrong-password':
-            userMessage = 'Incorrect password.';
-            break;
-        case 'auth/email-already-in-use':
-            userMessage = 'Email already in use. Please login instead.';
-            break;
-        case 'auth/weak-password':
-            userMessage = 'Password should be at least 6 characters.';
-            break;
-        case 'auth/popup-closed-by-user':
-            userMessage = 'Sign in popup was closed.';
-            break;
-        case 'auth/invalid-credential':
-            userMessage = 'Invalid email or password.';
-            break;
-        default:
-            userMessage = 'Authentication error: ' + errorMessage;
-    }
-    
-    showMessage(userMessage, 'error');
-}
-
-// Show Message to User
-function showMessage(message, type) {
-    // Remove existing messages
-    const existingMsg = document.querySelector('.auth-message');
-    if (existingMsg) {
-        existingMsg.remove();
-    }
-    
-    // Create message element
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `auth-message ${type}`;
-    messageDiv.textContent = message;
-    messageDiv.style.cssText = `
-        padding: 12px 20px;
-        margin: 15px 0;
-        border-radius: 8px;
-        text-align: center;
-        font-size: 14px;
-        animation: slideIn 0.3s ease;
-        ${type === 'success' ? 'background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 
-          'background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;'}
-    `;
-    
-    // Insert before sign in button
-    signInBtn.parentElement.insertBefore(messageDiv, signInBtn);
-    
-    // Auto remove after 5 seconds
     setTimeout(() => {
-        messageDiv.remove();
+        element.style.display = 'none';
     }, 5000);
 }
 
-// Validate Email Format
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Toggle between Login and Signup modes
-let isSignUpMode = false;
-
-function toggleMode() {
-    isSignUpMode = !isSignUpMode;
+// Show/Hide Loading
+function setLoading(btn, loadingId, isLoading) {
+    const btnText = btn.querySelector('.btn-text');
+    const loading = document.getElementById(loadingId);
     
-    if (isSignUpMode) {
-        signInBtn.textContent = 'Sign Up';
-        createAccountLink.innerHTML = 'Already have an account? <strong>Sign In</strong>';
+    if (isLoading) {
+        btnText.style.display = 'none';
+        loading.style.display = 'flex';
+        btn.disabled = true;
     } else {
-        signInBtn.textContent = 'Sign In';
-        createAccountLink.innerHTML = 'Don\'t have an account? <strong>Create Account</strong>';
+        btnText.style.display = 'inline';
+        loading.style.display = 'none';
+        btn.disabled = false;
     }
 }
 
-// Event Listeners
-if (signInBtn) {
-    signInBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        // Validation
-        if (!email || !password) {
-            showMessage('Please fill in all fields', 'error');
-            return;
-        }
-        
-        if (!isValidEmail(email)) {
-            showMessage('Please enter a valid email address', 'error');
-            return;
-        }
-        
-        if (password.length < 6) {
-            showMessage('Password must be at least 6 characters', 'error');
-            return;
-        }
-        
-        // Disable button during processing
-        signInBtn.disabled = true;
-        signInBtn.textContent = 'Processing...';
-        
-        // Call appropriate function
-        if (isSignUpMode) {
-            await signUpWithEmail(email, password);
-        } else {
-            await signInWithEmail(email, password);
-        }
-        
-        // Re-enable button
-        signInBtn.disabled = false;
-        signInBtn.textContent = isSignUpMode ? 'Sign Up' : 'Sign In';
-    });
+// Validate Email
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-if (googleSignInBtn) {
-    googleSignInBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        
-        googleSignInBtn.disabled = true;
-        const originalText = googleSignInBtn.textContent;
-        googleSignInBtn.textContent = 'Processing...';
-        
-        await signInWithGoogle();
-        
-        googleSignInBtn.disabled = false;
-        googleSignInBtn.textContent = originalText;
-    });
+// Handle Auth Errors
+function getErrorMessage(error) {
+    const errorCode = error.code;
+    
+    switch(errorCode) {
+        case 'auth/invalid-email':
+            return 'Invalid email address format.';
+        case 'auth/user-disabled':
+            return 'This account has been disabled.';
+        case 'auth/user-not-found':
+            return 'No account found with this email.';
+        case 'auth/wrong-password':
+            return 'Incorrect password.';
+        case 'auth/email-already-in-use':
+            return 'Email already in use. Please login instead.';
+        case 'auth/weak-password':
+            return 'Password should be at least 6 characters.';
+        case 'auth/popup-closed-by-user':
+            return 'Sign in popup was closed.';
+        case 'auth/invalid-credential':
+            return 'Invalid email or password.';
+        default:
+            return 'Authentication error: ' + error.message;
+    }
 }
 
-if (createAccountLink) {
-    createAccountLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleMode();
-    });
-}
+// LOGIN FORM HANDLER
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+    
+    loginError.style.display = 'none';
+    loginSuccess.style.display = 'none';
+    
+    // Validation
+    if (!email || !password) {
+        showMessage(loginError, 'Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showMessage(loginError, 'Please enter a valid email address', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showMessage(loginError, 'Password must be at least 6 characters', 'error');
+        return;
+    }
+    
+    setLoading(loginBtn, 'loginLoading', true);
+    
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        showMessage(loginSuccess, 'Sign in successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    } catch (error) {
+        console.error('Login error:', error);
+        showMessage(loginError, getErrorMessage(error), 'error');
+        setLoading(loginBtn, 'loginLoading', false);
+    }
+});
+
+// SIGNUP FORM HANDLER
+signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = signupName.value.trim();
+    const email = signupEmail.value.trim();
+    const password = signupPassword.value.trim();
+    
+    signupError.style.display = 'none';
+    signupSuccess.style.display = 'none';
+    
+    // Validation
+    if (!name || !email || !password) {
+        showMessage(signupError, 'Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        showMessage(signupError, 'Please enter a valid email address', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showMessage(signupError, 'Password must be at least 6 characters', 'error');
+        return;
+    }
+    
+    setLoading(signupBtn, 'signupLoading', true);
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        showMessage(signupSuccess, 'Account created successfully! Redirecting...', 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    } catch (error) {
+        console.error('Signup error:', error);
+        showMessage(signupError, getErrorMessage(error), 'error');
+        setLoading(signupBtn, 'signupLoading', false);
+    }
+});
+
+// GOOGLE LOGIN
+googleLoginBtn.addEventListener('click', async () => {
+    loginError.style.display = 'none';
+    googleLoginBtn.disabled = true;
+    googleLoginBtn.textContent = 'Signing in...';
+    
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        showMessage(loginSuccess, 'Google sign in successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    } catch (error) {
+        console.error('Google login error:', error);
+        showMessage(loginError, getErrorMessage(error), 'error');
+        googleLoginBtn.disabled = false;
+        googleLoginBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+        `;
+    }
+});
+
+// GOOGLE SIGNUP
+googleSignupBtn.addEventListener('click', async () => {
+    signupError.style.display = 'none';
+    googleSignupBtn.disabled = true;
+    googleSignupBtn.textContent = 'Signing up...';
+    
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        showMessage(signupSuccess, 'Google sign up successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    } catch (error) {
+        console.error('Google signup error:', error);
+        showMessage(signupError, getErrorMessage(error), 'error');
+        googleSignupBtn.disabled = false;
+        googleSignupBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+        `;
+    }
+});
+
+// TOGGLE BETWEEN LOGIN AND SIGNUP
+showSignupLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('hidden');
+    signupForm.classList.remove('hidden');
+});
+
+showLoginLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    signupForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+});
 
 // Monitor Authentication State
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log('User is signed in:', user);
-        
-        // If on login page and user is already logged in, redirect to dashboard
+        // Redirect if already logged in
         if (window.location.pathname.includes('login.html')) {
             window.location.href = 'index.html';
         }
     } else {
         console.log('No user signed in');
-        
-        // If on protected page and no user, redirect to login
-        if (!window.location.pathname.includes('login.html')) {
-            // Uncomment if you want to protect other pages
-            // window.location.href = 'login.html';
-        }
     }
 });
+</script>
 
-// Export functions for use in other files
-export { auth, signOutUser, onAuthStateChanged };</script>
 </body>
 </html>
+
 
