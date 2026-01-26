@@ -14,12 +14,27 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import torch
+
+checkpoint = torch.load("efficientnetv2_s_skin_best.pth", map_location="cpu")
+print("Checkpoint keys:", checkpoint.keys())
+print("Number of classes:", len(checkpoint["classes"]))
+print("Classes:", checkpoint["classes"])
+if "img_size" in checkpoint:
+    print("Image size:", checkpoint["img_size"])
+
+# Check model state dict
+model_keys = list(checkpoint["model"].keys())
+print(f"\nFirst 5 model keys: {model_keys[:5]}")
+print(f"Last 5 model keys: {model_keys[-5:]}")
+
 # -------------------------------------------------
 # APP CONFIG
 # -------------------------------------------------
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = 'mediscan-secret-key-2026-ultra-secure'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
+
 
 CORS(app, resources={
     r"/api/*": {
@@ -30,12 +45,14 @@ CORS(app, resources={
     }
 }, supports_credentials=True)
 
+
 # -------------------------------------------------
 # DATABASE CONFIG
 # -------------------------------------------------
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///patients.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
 
 class PatientRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,6 +63,7 @@ class PatientRecord(db.Model):
     top_predictions = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
@@ -53,24 +71,51 @@ class User(db.Model):
     full_name = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+
 # -------------------------------------------------
 # MODEL CONFIG
 # -------------------------------------------------
-MODEL_PATH = "efficientnet_b3_skin_best.pth"
-IMG_SIZE = 224
+MODEL_PATH = "efficientnetv2_s_skin_best.pth"
+IMG_SIZE = 384  # EfficientNetV2-S native resolution
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def load_model():
-    checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=True)
-    classes = checkpoint["classes"]
-    model = models.efficientnet_b3(weights=None)
-    model.classifier[1] = torch.nn.Linear(
-        model.classifier[1].in_features, len(classes)
-    )
-    model.load_state_dict(checkpoint["model"])
-    model.to(device)
-    model.eval()
-    return model, classes
+    try:
+        checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
+        classes = checkpoint["classes"]
+        
+        # Use checkpoint img_size if available
+        checkpoint_img_size = checkpoint.get("img_size", 384)
+        print(f"[INFO] Checkpoint image size: {checkpoint_img_size}")
+        
+        # Load EfficientNetV2-S model
+        model = models.efficientnet_v2_s(weights=None)
+        
+        # Get the number of input features for the classifier
+        num_features = model.classifier[1].in_features
+        
+        # Replace the classifier to match the number of classes
+        model.classifier[1] = torch.nn.Linear(num_features, len(classes))
+        
+        # Load weights
+        model.load_state_dict(checkpoint["model"])
+        model.to(device)
+        model.eval()
+        
+        print(f"[INFO] Model loaded successfully")
+        print(f"[INFO] Classes: {classes}")
+        
+        return model, classes
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to load model: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+
 
 try:
     model, classes = load_model()
@@ -82,6 +127,7 @@ except Exception as e:
     model = None
     classes = ["Melanoma", "Basal Cell Carcinoma", "Actinic Keratosis"]
 
+
 transform = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
@@ -90,6 +136,7 @@ transform = transforms.Compose([
         std=[0.229, 0.224, 0.225]
     )
 ])
+
 
 # -------------------------------------------------
 # GRAD-CAM IMPLEMENTATION
@@ -100,7 +147,7 @@ class GradCAM:
         self.gradients = None
         self.activations = None
         
-        # Hook for EfficientNet-B3
+        # Hook for EfficientNetV2-S - use the last convolutional layer
         target_layer = model.features[-1]
         target_layer.register_forward_hook(self.save_activation)
         target_layer.register_full_backward_hook(self.save_gradient)
@@ -131,6 +178,7 @@ class GradCAM:
         
         return heatmap.cpu().numpy()
 
+
 def apply_gradcam_overlay(image_pil, heatmap):
     """Apply Grad-CAM heatmap overlay on the original image"""
     # Resize heatmap to match image size
@@ -156,9 +204,11 @@ def apply_gradcam_overlay(image_pil, heatmap):
     
     return f"data:image/png;base64,{img_base64}"
 
+
 # -------------------------------------------------
 # API ROUTES
 # -------------------------------------------------
+
 
 # Authentication Routes
 @app.route("/api/register", methods=["POST", "OPTIONS"])
@@ -201,6 +251,7 @@ def register():
         "full_name": user.full_name
     }), 201
 
+
 @app.route("/api/login", methods=["POST", "OPTIONS"])
 def login():
     if request.method == "OPTIONS":
@@ -231,6 +282,7 @@ def login():
         "full_name": user.full_name
     }), 200
 
+
 @app.route("/api/logout", methods=["POST", "OPTIONS"])
 def logout():
     if request.method == "OPTIONS":
@@ -238,6 +290,7 @@ def logout():
     
     session.clear()
     return jsonify({"success": True}), 200
+
 
 @app.route("/api/current-user", methods=["GET"])
 def get_current_user():
@@ -257,6 +310,7 @@ def get_current_user():
         "username": user.username,
         "full_name": user.full_name
     }), 200
+
 
 @app.route("/api/analyze", methods=["POST", "OPTIONS"])
 def analyze_image():
@@ -371,6 +425,7 @@ def analyze_image():
             "message": f"Analysis failed: {str(e)}"
         }), 500
 
+
 @app.route("/api/records", methods=["GET"])
 def get_records():
     if "user_id" not in session:
@@ -402,6 +457,7 @@ def get_records():
         ]
     })
 
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({
@@ -411,13 +467,16 @@ def health():
         "device": str(device)
     })
 
+
 @app.route("/login")
 def login_page():
     return send_from_directory('.', 'login_local.html', mimetype='text/html')
 
+
 @app.route("/")
 def index():
     return send_from_directory('.', 'index.html', mimetype='text/html')
+
 
 # -------------------------------------------------
 # INIT
@@ -425,6 +484,7 @@ def index():
 with app.app_context():
     db.create_all()
     print("[INFO] Database initialized")
+
 
 if __name__ == "__main__":
     print("=" * 60)
