@@ -337,17 +337,20 @@ def analyze_image():
     if request.method == "OPTIONS":
         return "", 204
     
-    if "user_id" not in session:
-        return jsonify({"success": False, "message": "Not logged in"}), 401
+    # ✅ CHANGED: Make authentication optional - allow guest access
+    if "user_id" in session:
+        user_id = session["user_id"]
+        user = db.session.get(User, user_id)
+        if not user:
+            user_id = 0  # Guest mode
+            username = "Guest"
+        else:
+            username = user.username
+    else:
+        user_id = 0  # Guest mode - no login required
+        username = "Guest"
     
-    user_id = session["user_id"]
-    user = db.session.get(User, user_id)
-    
-    if not user:
-        session.clear()
-        return jsonify({"success": False, "message": "User not found"}), 401
-    
-    print(f"[INFO] Analyze request from user: {user.username}")
+    print(f"[INFO] Analyze request from user: {username} (ID: {user_id})")
     
     if "image" not in request.files:
         return jsonify({"success": False, "message": "Image file missing"}), 400
@@ -390,25 +393,34 @@ def analyze_image():
             gradcam_bytes = apply_gradcam_overlay(image, heatmap)
             inference_time = time.time() - start_time
         
-        encrypted_img, salt, iv = ImageEncryption.encrypt_image(image_bytes, user_id)
-        encrypted_gradcam, gradcam_salt, gradcam_iv = ImageEncryption.encrypt_image(gradcam_bytes, user_id)
-        
-        record = PatientRecord(
-            user_code=str(user_id),
-            diagnosis=top_predictions[0]["condition"],
-            confidence=top_predictions[0]["confidence"],
-            recommendation="AI-assisted result. Consult a dermatologist.",
-            top_predictions=json.dumps(top_predictions),
-            encrypted_image=encrypted_img,
-            encryption_salt=salt,
-            encryption_iv=iv,
-            encrypted_gradcam=encrypted_gradcam,
-            gradcam_iv=gradcam_iv,
-            inference_time=inference_time
-        )
-        
-        db.session.add(record)
-        db.session.commit()
+        # ✅ CHANGED: Only encrypt and save to database if user is logged in
+        record_id = None
+        if user_id > 0:
+            encrypted_img, salt, iv = ImageEncryption.encrypt_image(image_bytes, user_id)
+            encrypted_gradcam, gradcam_salt, gradcam_iv = ImageEncryption.encrypt_image(gradcam_bytes, user_id)
+            
+            record = PatientRecord(
+                user_code=str(user_id),
+                diagnosis=top_predictions[0]["condition"],
+                confidence=top_predictions[0]["confidence"],
+                recommendation="AI-assisted result. Consult a dermatologist.",
+                top_predictions=json.dumps(top_predictions),
+                encrypted_image=encrypted_img,
+                encryption_salt=salt,
+                encryption_iv=iv,
+                encrypted_gradcam=encrypted_gradcam,
+                gradcam_iv=gradcam_iv,
+                inference_time=inference_time
+            )
+            
+            db.session.add(record)
+            db.session.commit()
+            record_id = record.id
+            encryption_status = "✓ Encrypted with AES-256"
+            print(f"[INFO] Record saved to database (ID: {record_id})")
+        else:
+            encryption_status = "Guest mode - not saved"
+            print("[INFO] Guest analysis - not saved to database")
         
         gradcam_b64 = f"data:image/png;base64,{base64.b64encode(gradcam_bytes).decode()}"
         
@@ -420,8 +432,8 @@ def analyze_image():
             "gradcam": gradcam_b64,
             "explanation": f"The model identified {top_predictions[0]['condition']} with {top_predictions[0]['confidence']} confidence.",
             "recommendation": "AI-assisted result. Consult a dermatologist.",
-            "record_id": record.id,
-            "encryption_status": "✓ Encrypted with AES-256",
+            "record_id": record_id,
+            "encryption_status": encryption_status,
             "inference_time": f"{inference_time:.2f}s"
         })
         
@@ -621,3 +633,4 @@ if __name__ == "__main__":
     print("=" * 60)
     
     app.run(host="0.0.0.0", port=port, debug=False)
+
