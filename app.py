@@ -28,6 +28,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'mediscan-secret-key-2026-ultra-secure')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
+# ⭐ ADD THESE SESSION CONFIG LINES
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allow cross-origin cookies
+app.config['SESSION_COOKIE_SECURE'] = True       # Require HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True     # Prevent XSS
+app.config['SESSION_COOKIE_DOMAIN'] = None       # Allow any domain
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour session
+
 # CORS - Allow Netlify frontend
 CORS(app, resources={
     r"/api/*": {
@@ -38,7 +45,7 @@ CORS(app, resources={
         ],
         "methods": ["GET", "POST", "OPTIONS", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
+        "supports_credentials": True  # ⭐ Must be True for cookies
     }
 }, supports_credentials=True)
 
