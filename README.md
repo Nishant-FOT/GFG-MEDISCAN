@@ -1,5 +1,6 @@
 # GFG-MEDISCAN
 This is  My team Project for GFG's Hack-4-Viksit Bharat
+Dataset and full assets will be available in Drive: https://drive.google.com/drive/folders/198FGDoE6E3bV72GI1z_p0jS563UeAR5I?usp=sharing
 ```md
 # MediScan — AI-Assisted Dermatology Diagnosis
 
@@ -12,7 +13,7 @@ A doctor-friendly, privacy-preserving AI platform designed to revolutionize derm
 ## Key Features
 
 - Image-only diagnosis pipeline (no text input required). [conversation_history:1]
-- EfficientNet-B3 based skin disease classifier. [conversation_history:1]
+- EfficientNetV2- based skin disease classifier. [conversation_history:1]
 - Returns **Top-3 predictions** with confidence scores. [conversation_history:1]
 - **Grad-CAM** visualization to explain model focus regions (why the model predicted a class). [conversation_history:1]
 - Session-based authentication (Firebase removed). [conversation_history:1]
@@ -44,7 +45,7 @@ NEW_MODEL/
 ├── instance/
 │   └── patients.db
 ├── app.py
-├── efficientnet_b3_skin_best.pth
+├── efficientnetv2_s_skin_best.pth
 ├── index.html
 ├── login_local.html
 ├── login.html
