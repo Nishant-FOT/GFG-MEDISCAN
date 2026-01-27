@@ -1,0 +1,13 @@
+[build]
+  # No build command needed for static HTML
+  command = ""
+  # Serve files from root directory
+  publish = "."
+
+[[headers]]
+  # Apply these headers to all routes
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
